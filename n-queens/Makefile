@@ -1,0 +1,97 @@
+# Compiler flags
+MYFLAGS=
+CXXFIRSTFLAGS= -O3 -W -Wall -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-use-after-free
+#CXXFIRSTFLAGSDEBUG= -g -O0 -DDEBUG -W -Wall -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-use-after-free -fsanitize=address -v -da -Q
+CXXFIRSTFLAGSDEBUG= -g -O0 -DDEBUG -W -Wall -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-use-after-free
+CXXFIRSTFLAGSINFO= -g -O2 -W -Wall -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno-use-after-free
+#LDFLAGSDEBUG=-pthread -lghost_staticd -fsanitize=address -static-libasan
+LDFLAGSDEBUG=-pthread -lghost_staticd
+LDFLAGSINFO=-pthread -lghost
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	CXX=g++
+	CXXFLAGS= -std=c++17 $(CXXFIRSTFLAGS) $(MYFLAGS)
+	CXXFLAGSDEBUG= -std=c++17 $(CXXFIRSTFLAGSDEBUG) $(MYFLAGS)
+	CXXFLAGSINFO= -std=c++17 $(CXXFIRSTFLAGSINFO) $(MYFLAGS)
+	LDFLAGS=-pthread -lghost_static
+endif
+ifeq ($(UNAME_S),Darwin)
+	CXX=clang++
+	CXXFLAGS= -std=c++17  -stdlib=libc++ $(CXXFIRSTFLAGS) $(MYFLAGS)
+	CXXFLAGSDEBUG= -std=c++17  -stdlib=libc++ $(CXXFIRSTFLAGSDEBUG) $(MYFLAGS)
+	LDFLAGS=-pthread -lghost_static -lc++ -lc++abi
+endif
+
+# Directories
+SRCDIR=src
+HPPDIR=src
+OBJDIR=obj
+BINDIR=bin
+
+# Files
+SOURCES=$(foreach sdir, $(SRCDIR), $(wildcard $(sdir)/*.cpp))
+OBJECTS=$(patsubst %.cpp, $(OBJDIR)/%.o, $(notdir $(SOURCES)))
+
+vpath %.cpp $(SRCDIR)
+
+# Reminder, 'cause it is easy to forget makefile's fucked-up syntax...
+# $@ is what triggered the rule, ie the target before :
+# $^ is the whole dependencies list, ie everything after :
+# $< is the first item in the dependencies list
+
+# Rules
+
+all: $(BINDIR)/nqueens_permut $(BINDIR)/nqueens_alldiff $(BINDIR)/nqueens_permut_pure_csp $(BINDIR)/nqueens_alldiff_pure_csp
+
+debug: CXXFLAGS=$(CXXFLAGSDEBUG)
+debug: LDFLAGS=$(LDFLAGSDEBUG)
+debug: $(BINDIR)/nqueens_permut $(BINDIR)/nqueens_alldiff
+
+info: CXXFLAGS=$(CXXFLAGSINFO)
+info: LDFLAGS=$(LDFLAGSINFO)
+info: $(BINDIR)/nqueens_permut $(BINDIR)/nqueens_alldiff
+
+$(BINDIR)/nqueens_permut: $(OBJDIR)/nqueens.o $(OBJDIR)/builder_nqueens_permut.o $(OBJDIR)/constraint_diagonal.o $(OBJDIR)/print_nqueens.o
+	$(CXX) -o $@ $^ $(LDFLAGS)
+
+$(BINDIR)/nqueens_alldiff: $(OBJDIR)/nqueens.o $(OBJDIR)/builder_nqueens_alldiff.o $(OBJDIR)/alldifferent.o $(OBJDIR)/constraint_diagonal.o $(OBJDIR)/print_nqueens.o
+	$(CXX) -o $@ $^ $(LDFLAGS)
+
+$(BINDIR)/nqueens_permut_pure_csp: $(OBJDIR)/nqueens.o $(OBJDIR)/builder_nqueens_permut.o $(OBJDIR)/constraint_diagonal_pure_csp.o $(OBJDIR)/print_nqueens.o
+	$(CXX) -o $@ $^ $(LDFLAGS)
+
+$(BINDIR)/nqueens_alldiff_pure_csp: $(OBJDIR)/nqueens.o $(OBJDIR)/builder_nqueens_alldiff_pure_csp.o $(OBJDIR)/alldifferent_pure_csp.o $(OBJDIR)/constraint_diagonal_pure_csp.o $(OBJDIR)/print_nqueens.o
+	$(CXX) -o $@ $^ $(LDFLAGS)
+
+$(OBJDIR)/nqueens.o: $(OBJDIR)/builder_nqueens_permut.o $(OBJDIR)/builder_nqueens_alldiff.o $(OBJDIR)/print_nqueens.o
+	$(CXX) $(CXXFLAGS) -I$(HPPDIR) -c $(SRCDIR)/nqueens.cpp -o $@
+
+$(OBJDIR)/builder_nqueens_permut.o: $(OBJDIR)/constraint_diagonal.o
+	$(CXX) $(CXXFLAGS) -I$(HPPDIR) -c $(SRCDIR)/builder_nqueens_permut.cpp -o $@
+
+$(OBJDIR)/builder_nqueens_alldiff.o: $(OBJDIR)/constraint_diagonal.o $(OBJDIR)/alldifferent.o
+	$(CXX) $(CXXFLAGS) -I$(HPPDIR) -c $(SRCDIR)/builder_nqueens_alldiff.cpp -o $@
+
+$(OBJDIR)/builder_nqueens_alldiff_pure_csp.o: $(OBJDIR)/constraint_diagonal.o $(OBJDIR)/alldifferent_pure_csp.o
+	$(CXX) $(CXXFLAGS) -DPURE_CSP -I$(HPPDIR) -c $(SRCDIR)/builder_nqueens_alldiff.cpp -o $@
+
+$(OBJDIR)/alldifferent.o:
+	$(CXX) $(CXXFLAGS) -I$(HPPDIR) -c $(SRCDIR)/alldifferent.cpp -o $@
+
+$(OBJDIR)/alldifferent_pure_csp.o:
+	$(CXX) $(CXXFLAGS) -I$(HPPDIR) -c $(SRCDIR)/alldifferent_pure_csp.cpp -o $@
+
+$(OBJDIR)/constraint_diagonal.o:
+	$(CXX) $(CXXFLAGS) -I$(HPPDIR) -c $(SRCDIR)/constraint_diagonal.cpp -o $@
+
+$(OBJDIR)/constraint_diagonal_pure_csp.o:
+	$(CXX) $(CXXFLAGS) -DPURE_CSP -I$(HPPDIR) -c $(SRCDIR)/constraint_diagonal.cpp -o $@
+
+$(OBJDIR)/print_nqueens.o:
+	$(CXX) $(CXXFLAGS) -I$(HPPDIR) -c $(SRCDIR)/print_nqueens.cpp -o $@
+
+.PHONY: clean
+
+clean:
+	rm -fr core $(BINDIR)/nqueens_permut $(BINDIR)/nqueens_alldiff $(BINDIR)/nqueens_permut_pure_csp $(BINDIR)/nqueens_alldiff_pure_csp $(BINDIR)/nqueens_complete $(OBJDIR)/*
