@@ -1,0 +1,16 @@
+#!/bin/bash
+
+make clean
+make MYFLAGS=-DGHOST_RANDOM_WALK
+mv bin/nqueens_alldiff bin/nqueens_alldiff_efcsp_random_walk
+mv bin/nqueens_permut bin/nqueens_permut_efcsp_random_walk
+mv bin/nqueens_alldiff_csp bin/nqueens_alldiff_csp_random_walk
+mv bin/nqueens_permut_csp bin/nqueens_permut_csp_random_walk
+
+make clean
+make MYFLAGS=-DGHOST_HILL_CLIMBING
+mv bin/nqueens_alldiff bin/nqueens_alldiff_efcsp_hill_climbing
+mv bin/nqueens_permut bin/nqueens_permut_efcsp_hill_climbing
+mv bin/nqueens_alldiff_csp bin/nqueens_alldiff_csp_hill_climbing
+mv bin/nqueens_permut_csp bin/nqueens_permut_csp_hill_climbing
+
