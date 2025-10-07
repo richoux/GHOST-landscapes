@@ -11,15 +11,15 @@ LDFLAGSINFO=-pthread -lghost
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
 	CXX=g++
-	CXXFLAGS= -std=c++17 $(CXXFIRSTFLAGS) $(MYFLAGS)
-	CXXFLAGSDEBUG= -std=c++17 $(CXXFIRSTFLAGSDEBUG) $(MYFLAGS)
-	CXXFLAGSINFO= -std=c++17 $(CXXFIRSTFLAGSINFO) $(MYFLAGS)
+	CXXFLAGS= -std=c++20 $(CXXFIRSTFLAGS) $(MYFLAGS)
+	CXXFLAGSDEBUG= -std=c++20 $(CXXFIRSTFLAGSDEBUG) $(MYFLAGS)
+	CXXFLAGSINFO= -std=c++20 $(CXXFIRSTFLAGSINFO) $(MYFLAGS)
 	LDFLAGS=-pthread -lghost_static
 endif
 ifeq ($(UNAME_S),Darwin)
 	CXX=clang++
-	CXXFLAGS= -std=c++17  -stdlib=libc++ $(CXXFIRSTFLAGS) $(MYFLAGS)
-	CXXFLAGSDEBUG= -std=c++17  -stdlib=libc++ $(CXXFIRSTFLAGSDEBUG) $(MYFLAGS)
+	CXXFLAGS= -std=c++20  -stdlib=libc++ $(CXXFIRSTFLAGS) $(MYFLAGS)
+	CXXFLAGSDEBUG= -std=c++20  -stdlib=libc++ $(CXXFIRSTFLAGSDEBUG) $(MYFLAGS)
 	LDFLAGS=-pthread -lghost_static -lc++ -lc++abi
 endif
 
@@ -42,7 +42,7 @@ vpath %.cpp $(SRCDIR)
 
 # Rules
 
-all: $(BINDIR)/nqueens_permut $(BINDIR)/nqueens_alldiff $(BINDIR)/nqueens_permut_pure_csp $(BINDIR)/nqueens_alldiff_pure_csp
+all: $(BINDIR)/nqueens_permut $(BINDIR)/nqueens_alldiff $(BINDIR)/nqueens_permut_csp $(BINDIR)/nqueens_alldiff_csp
 
 debug: CXXFLAGS=$(CXXFLAGSDEBUG)
 debug: LDFLAGS=$(LDFLAGSDEBUG)
@@ -58,10 +58,10 @@ $(BINDIR)/nqueens_permut: $(OBJDIR)/nqueens.o $(OBJDIR)/builder_nqueens_permut.o
 $(BINDIR)/nqueens_alldiff: $(OBJDIR)/nqueens.o $(OBJDIR)/builder_nqueens_alldiff.o $(OBJDIR)/alldifferent.o $(OBJDIR)/constraint_diagonal.o $(OBJDIR)/print_nqueens.o
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
-$(BINDIR)/nqueens_permut_pure_csp: $(OBJDIR)/nqueens.o $(OBJDIR)/builder_nqueens_permut.o $(OBJDIR)/constraint_diagonal_pure_csp.o $(OBJDIR)/print_nqueens.o
+$(BINDIR)/nqueens_permut_csp: $(OBJDIR)/nqueens.o $(OBJDIR)/builder_nqueens_permut.o $(OBJDIR)/constraint_diagonal_csp.o $(OBJDIR)/print_nqueens.o
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
-$(BINDIR)/nqueens_alldiff_pure_csp: $(OBJDIR)/nqueens.o $(OBJDIR)/builder_nqueens_alldiff_pure_csp.o $(OBJDIR)/alldifferent_pure_csp.o $(OBJDIR)/constraint_diagonal_pure_csp.o $(OBJDIR)/print_nqueens.o
+$(BINDIR)/nqueens_alldiff_csp: $(OBJDIR)/nqueens.o $(OBJDIR)/builder_nqueens_alldiff_csp.o $(OBJDIR)/alldifferent_csp.o $(OBJDIR)/constraint_diagonal_csp.o $(OBJDIR)/print_nqueens.o
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
 $(OBJDIR)/nqueens.o: $(OBJDIR)/builder_nqueens_permut.o $(OBJDIR)/builder_nqueens_alldiff.o $(OBJDIR)/print_nqueens.o
@@ -73,19 +73,19 @@ $(OBJDIR)/builder_nqueens_permut.o: $(OBJDIR)/constraint_diagonal.o
 $(OBJDIR)/builder_nqueens_alldiff.o: $(OBJDIR)/constraint_diagonal.o $(OBJDIR)/alldifferent.o
 	$(CXX) $(CXXFLAGS) -I$(HPPDIR) -c $(SRCDIR)/builder_nqueens_alldiff.cpp -o $@
 
-$(OBJDIR)/builder_nqueens_alldiff_pure_csp.o: $(OBJDIR)/constraint_diagonal.o $(OBJDIR)/alldifferent_pure_csp.o
+$(OBJDIR)/builder_nqueens_alldiff_csp.o: $(OBJDIR)/constraint_diagonal.o $(OBJDIR)/alldifferent_csp.o
 	$(CXX) $(CXXFLAGS) -DPURE_CSP -I$(HPPDIR) -c $(SRCDIR)/builder_nqueens_alldiff.cpp -o $@
 
 $(OBJDIR)/alldifferent.o:
 	$(CXX) $(CXXFLAGS) -I$(HPPDIR) -c $(SRCDIR)/alldifferent.cpp -o $@
 
-$(OBJDIR)/alldifferent_pure_csp.o:
+$(OBJDIR)/alldifferent_csp.o:
 	$(CXX) $(CXXFLAGS) -I$(HPPDIR) -c $(SRCDIR)/alldifferent_pure_csp.cpp -o $@
 
 $(OBJDIR)/constraint_diagonal.o:
 	$(CXX) $(CXXFLAGS) -I$(HPPDIR) -c $(SRCDIR)/constraint_diagonal.cpp -o $@
 
-$(OBJDIR)/constraint_diagonal_pure_csp.o:
+$(OBJDIR)/constraint_diagonal_csp.o:
 	$(CXX) $(CXXFLAGS) -DPURE_CSP -I$(HPPDIR) -c $(SRCDIR)/constraint_diagonal.cpp -o $@
 
 $(OBJDIR)/print_nqueens.o:
@@ -94,4 +94,4 @@ $(OBJDIR)/print_nqueens.o:
 .PHONY: clean
 
 clean:
-	rm -fr core $(BINDIR)/nqueens_permut $(BINDIR)/nqueens_alldiff $(BINDIR)/nqueens_permut_pure_csp $(BINDIR)/nqueens_alldiff_pure_csp $(BINDIR)/nqueens_complete $(OBJDIR)/*
+	rm -fr core $(BINDIR)/nqueens_permut $(BINDIR)/nqueens_alldiff $(BINDIR)/nqueens_permut_csp $(BINDIR)/nqueens_alldiff_csp $(BINDIR)/nqueens_complete $(OBJDIR)/*

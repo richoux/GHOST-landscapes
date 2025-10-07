@@ -5,12 +5,12 @@ CXXFIRSTFLAGS= -O3 -W -Wall -Wextra -Wno-sign-compare -Wno-unused-parameter -Wno
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
 	CXX=g++
-	CXXFLAGS= -std=c++17 $(CXXFIRSTFLAGS) $(MYFLAGS)
+	CXXFLAGS= -std=c++20 $(CXXFIRSTFLAGS) $(MYFLAGS)
 	LDFLAGS=-lghost_static -pthread
 endif
 ifeq ($(UNAME_S),Darwin)
 	CXX=clang++
-	CXXFLAGS= -std=c++17  -stdlib=libc++ $(CXXFIRSTFLAGS) $(MYFLAGS)
+	CXXFLAGS= -std=c++20  -stdlib=libc++ $(CXXFIRSTFLAGS) $(MYFLAGS)
 	LDFLAGS=-lghost_static -lc++ -lc++abi -pthread
 endif
 
@@ -34,30 +34,18 @@ vpath %.o $(OBJDIR)
 
 # Rules
 
-all: $(BINDIR)/magic_square $(BINDIR)/min_magic_square $(BINDIR)/magic_square_pure_csp $(BINDIR)/min_magic_square_pure_csp
+all: $(BINDIR)/magic_square_efcsp $(BINDIR)/magic_square_csp 
 
-$(BINDIR)/magic_square: $(OBJDIR)/magic_square.o $(OBJDIR)/builder_ms.o $(OBJDIR)/linear_eq.o $(OBJDIR)/alldifferent.o $(OBJDIR)/print_ms.o
+$(BINDIR)/magic_square_efcsp: $(OBJDIR)/magic_square_efcsp.o $(OBJDIR)/builder_ms.o $(OBJDIR)/linear_eq.o $(OBJDIR)/alldifferent.o $(OBJDIR)/print_ms.o
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
-$(BINDIR)/min_magic_square: $(OBJDIR)/min_magic_square.o $(OBJDIR)/min_builder_ms.o $(OBJDIR)/linear_eq.o $(OBJDIR)/alldifferent.o $(OBJDIR)/print_ms.o $(OBJDIR)/min_sum_corners.o
+$(BINDIR)/magic_square_csp: $(OBJDIR)/magic_square_pure_csp.o $(OBJDIR)/builder_ms_pure_csp.o $(OBJDIR)/linear_eq_pure_csp.o $(OBJDIR)/alldifferent_pure_csp.o $(OBJDIR)/print_ms.o
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
-$(BINDIR)/magic_square_pure_csp: $(OBJDIR)/magic_square_pure_csp.o $(OBJDIR)/builder_ms_pure_csp.o $(OBJDIR)/linear_eq_pure_csp.o $(OBJDIR)/alldifferent_pure_csp.o $(OBJDIR)/print_ms.o
-	$(CXX) -o $@ $^ $(LDFLAGS)
-
-$(BINDIR)/min_magic_square_pure_csp: $(OBJDIR)/min_magic_square_pure_csp.o $(OBJDIR)/min_builder_ms_pure_csp.o $(OBJDIR)/linear_eq_pure_csp.o $(OBJDIR)/alldifferent_pure_csp.o $(OBJDIR)/print_ms.o $(OBJDIR)/min_sum_corners.o
-	$(CXX) -o $@ $^ $(LDFLAGS)
-
-$(OBJDIR)/magic_square.o: $(OBJDIR)/builder_ms.o $(OBJDIR)/print_ms.o
-	$(CXX) $(CXXFLAGS) -I$(HPPDIR) -c $(SRCDIR)/magic_square.cpp -o $@
-
-$(OBJDIR)/min_magic_square.o: $(OBJDIR)/min_builder_ms.o $(OBJDIR)/print_ms.o
+$(OBJDIR)/magic_square_efcsp.o: $(OBJDIR)/builder_ms.o $(OBJDIR)/print_ms.o
 	$(CXX) $(CXXFLAGS) -I$(HPPDIR) -c $(SRCDIR)/magic_square.cpp -o $@
 
 $(OBJDIR)/magic_square_pure_csp.o: $(OBJDIR)/builder_ms_pure_csp.o $(OBJDIR)/print_ms.o
-	$(CXX) $(CXXFLAGS) -DPURE_CSP -I$(HPPDIR) -c $(SRCDIR)/magic_square.cpp -o $@
-
-$(OBJDIR)/min_magic_square_pure_csp.o: $(OBJDIR)/min_builder_ms_pure_csp.o $(OBJDIR)/print_ms.o
 	$(CXX) $(CXXFLAGS) -DPURE_CSP -I$(HPPDIR) -c $(SRCDIR)/magic_square.cpp -o $@
 
 $(OBJDIR)/builder_ms.o: $(OBJDIR)/linear_eq.o $(OBJDIR)/alldifferent.o 
@@ -93,4 +81,4 @@ $(OBJDIR)/min_sum_corners.o:
 .PHONY: clean
 
 clean:
-	rm -fr core $(BINDIR)/magic_square $(BINDIR)/min_magic_square $(BINDIR)/magic_square_pure_csp $(BINDIR)/min_magic_square_pure_csp $(OBJECTS) $(OBJDIR)/min_magic_square.o $(OBJDIR)/min_builder_ms.o $(OBJDIR)/min_magic_square_pure_csp.o $(OBJDIR)/min_builder_ms_pure_csp.o $(OBJDIR)/magic_square_pure_csp.o $(OBJDIR)/builder_ms_pure_csp.o
+	rm -fr core $(BINDIR)/magic_square_efcsp $(BINDIR)/magic_square_csp $(OBJECTS)/*
