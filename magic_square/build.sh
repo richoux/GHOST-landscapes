@@ -10,3 +10,7 @@ make MYFLAGS=-DGHOST_HILL_CLIMBING
 mv bin/magic_square_efcsp bin/magic_square_efcsp_hill_climbing
 mv bin/magic_square_csp bin/magic_square_csp_hill_climbing
 
+make clean
+make MYFLAGS=-DGHOST_FITNESS_CLOUD
+mv bin/magic_square_efcsp bin/magic_square_efcsp_fitness_cloud
+mv bin/magic_square_csp bin/magic_square_csp_fitness_cloud

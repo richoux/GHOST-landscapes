@@ -14,3 +14,9 @@ mv bin/nqueens_permut bin/nqueens_permut_efcsp_hill_climbing
 mv bin/nqueens_alldiff_csp bin/nqueens_alldiff_csp_hill_climbing
 mv bin/nqueens_permut_csp bin/nqueens_permut_csp_hill_climbing
 
+make clean
+make MYFLAGS=-DGHOST_FITNESS_CLOUD
+mv bin/nqueens_alldiff bin/nqueens_alldiff_efcsp_fitness_cloud
+mv bin/nqueens_permut bin/nqueens_permut_efcsp_fitness_cloud
+mv bin/nqueens_alldiff_csp bin/nqueens_alldiff_csp_fitness_cloud
+mv bin/nqueens_permut_csp bin/nqueens_permut_csp_fitness_cloud
